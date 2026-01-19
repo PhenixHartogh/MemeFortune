@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Meme Fortune Teller 🔮</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: "Comic Sans MS", system-ui, sans-serif;
+    background: radial-gradient(circle at top, #1a0033, #000);
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .container {
+    width: 420px;
+    padding: 20px;
+    text-align: center;
+  }
+
+  h1 {
+    text-shadow: 0 0 15px #b266ff;
+  }
+
+  select, button {
+    padding: 10px;
+    border-radius: 999px;
+    border: none;
+    font-weight: bold;
+    margin: 6px;
+    cursor: pointer;
+  }
+
+  .ball {
+    font-size: 6rem;
+    cursor: pointer;
+    animation: float 3s ease-in-out infinite;
+    filter: drop-shadow(0 0 20px #b266ff);
+  }
+
+  @keyframes float {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+    100% { transform: translateY(0); }
+  }
+
+  .fortune-box {
+    display: none;
+    margin-top: 20px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 15px;
+    padding: 15px;
+    box-shadow: 0 0 25px rgba(178,102,255,0.4);
+  }
+
+  .rarity {
+    font-weight: bold;
+    margin-bottom: 6px;
+  }
+
+  .fortune-text {
+    margin-bottom: 10px;
+  }
+
+  img {
+    width: 100%;
+    border-radius: 12px;
+  }
+
+  footer {
+    opacity: 0.6;
+    font-size: 0.75rem;
+    margin-top: 15px;
+  }
+</style>
+</head>
+
+<body>
+<div class="container">
+  <h1>🔮 Meme Fortune Teller</h1>
+
+  <select id="mode">
+    <option value="genz">Gen-Z Mode</option>
+    <option value="corporate">Corporate Mode</option>
+    <option value="unhinged">Unhinged Mode</option>
+  </select>
+
+  <br>
+
+  <button onclick="toggleSound()">🔊 Toggle Sound</button>
+
+  <div class="ball" onclick="tellFortune()">🔮</div>
+
+  <div class="fortune-box" id="box">
+    <div class="rarity" id="rarity"></div>
+    <div class="fortune-text" id="text"></div>
+    <img id="gif">
+    <button onclick="tellFortune()">🔁 Again</button>
+  </div>
+
+  <footer>Powered by vibes, chaos & bad decisions</footer>
+</div>
+
+<audio id="sound-common" src="https://www.myinstants.com/media/sounds/pop.mp3"></audio>
+<audio id="sound-rare" src="https://www.myinstants.com/media/sounds/coin.mp3"></audio>
+<audio id="sound-epic" src="https://www.myinstants.com/media/sounds/wow.mp3"></audio>
+<audio id="sound-mythic" src="https://www.myinstants.com/media/sounds/vine-boom.mp3"></audio>
+
+<script>
+let soundOn = true;
+function toggleSound(){ soundOn = !soundOn; }
+
+const rarities = [
+  {name:"COMMON", weight:55, sound:"sound-common", color:"#aaa"},
+  {name:"RARE", weight:25, sound:"sound-rare", color:"#4da6ff"},
+  {name:"EPIC", weight:15, sound:"sound-epic", color:"#b266ff"},
+  {name:"MYTHIC", weight:5, sound:"sound-mythic", color:"#ff4d4d"}
+];
+
+function weighted(arr){
+  const pool=[];
+  arr.forEach(r=>{for(let i=0;i<r.weight;i++)pool.push(r)});
+  return pool[Math.floor(Math.random()*pool.length)];
+}
+
+const data = {
+genz:{
+templates:Array(50).fill().map((_,i)=>`Today is {mood} when {situation}`),
+moods:[
+"unhinged","main-character energy","chronically tired","emotionally feral",
+"vibing","low-battery","delusionally confident","soft-launched chaos",
+"overstimulated","feral but thriving"
+],
+situations:[
+"you open TikTok","your Wi-Fi lags","someone texts 'hey'",
+"you forget why you opened your phone","you hear the notification sound",
+"you check your bank account","your coffee hits","your alarm goes off",
+"you lie down for 5 minutes","you check the group chat"
+],
+outcomes:[
+"and survive","and spiral","but slay anyway","then dissociate",
+"but gaslight yourself","and overshare","but post about it",
+"and need a nap","but blame the universe","and pretend it’s fine"
+]
+},
+corporate:{
+templates:Array(50).fill().map(()=>`Your productivity becomes {mood} after {situation}`),
+moods:[
+"misaligned","action-oriented","synergy-adjacent","low-bandwidth",
+"deliverable-focused","stakeholder-confused","deadline-driven",
+"calendar-blocked","meeting-fatigued","burnout-coded"
+],
+situations:[
+"a meeting that could be an email","a follow-up email",
+"a surprise deadline","calendar double booking",
+'a "quick call"',"an all-hands meeting",
+"a Jira notification","someone says 'circle back'",
+"a Slack ping","a passive-aggressive email"
+],
+outcomes:[
+"with minimal impact","pending alignment",
+"and no resolution","for visibility",
+"and immediate burnout","until EOD",
+"with no next steps","and unclear ownership",
+"but high urgency","until Q4"
+]
+},
+unhinged:{
+templates:Array(50).fill().map(()=>`The universe becomes {mood} when {situation}`),
+moods:[
+"feral","cursed","haunted","chaotic","cosmically rude",
+"deeply unserious","violently inconvenient","ominous",
+"unreasonably personal","biblically accurate"
+],
+situations:[
+"Mercury breathes","you blink","time passes",
+"you feel hope","the app loads","the sun rises",
+"you make plans","you relax","you trust vibes","you exist"
+],
+outcomes:[
+"and laughs","for character development",
+"just because","with intent","and watches",
+"without apology","again","on purpose","no explanation","amen"
+]
+}
+};
+
+const gifs = Array.from({length:50},(_,i)=>`https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif`);
+
+function rand(a){ return a[Math.floor(Math.random()*a.length)]; }
+
+function tellFortune(){
+  const mode = document.getElementById("mode").value;
+  const d = data[mode];
+  const rarity = weighted(rarities);
+
+  let text = rand(d.templates)
+    .replace("{mood}", rand(d.moods))
+    .replace("{situation}", rand(d.situations));
+
+  text += " — " + rand(d.outcomes) + ".";
+
+  document.getElementById("text").textContent = text;
+  document.getElementById("gif").src = rand(gifs);
+  document.getElementById("rarity").textContent = rarity.name;
+  document.getElementById("rarity").style.color = rarity.color;
+  document.getElementById("box").style.display = "block";
+
+  if(soundOn){
+    document.getElementById(rarity.sound).currentTime = 0;
+    document.getElementById(rarity.sound).play();
+  }
+}
+</script>
+</body>
+</html>
